@@ -1,4 +1,4 @@
-#include "headers/User.hpp"
+#include "User.hpp"
 
 
 User::User(std::string _username, std::string _password, std::string _admin_status, int _size, std::vector <std::string> _accessible_files) 
@@ -14,7 +14,7 @@ void User::check() {
     std::cout << this->admin_status << std::endl;
     std::cout << this->size << std::endl;
 
-    for (int i = 0; i < accessible_files.size(); i++) {
+    for (long unsigned int i = 0; i < accessible_files.size(); i++) {
         std::cout << accessible_files[i] << std::endl;
     }
 }

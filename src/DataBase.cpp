@@ -1,4 +1,4 @@
-#include "headers/DataBase.hpp"
+#include "DataBase.hpp"
 
 using json = nlohmann::json;
 
@@ -40,7 +40,7 @@ void DataBase::parse_json() {
 }
 
 void DataBase::check() {
-    for (int i = 0; i < users.size(); i++) {
+    for (long unsigned int i = 0; i < users.size(); i++) {
         users[i].check();
     }
 }

@@ -1,9 +1,9 @@
-#include "headers/include.hpp"
+#include "include.hpp"
 
 int main() {
     DataBase *test = new DataBase();
 
-    //test->check();
+    test->check();
 
     return 0;
 }
