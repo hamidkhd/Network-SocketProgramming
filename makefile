@@ -4,21 +4,25 @@ SRC_DIR = src
 INCLUDE_DIR = include
 CFLAGS = -std=c++11 -Wall -Werror -I$(INCLUDE_DIR)
 
-EXECUTABLE_FILE = result.out
+SERVER_EXECUTABLE_FILE = server.out
+CLIENT_EXECUTABLE_FILE = client.out
+
+all: $(BUILD_DIR) $(SERVER_EXECUTABLE_FILE) \
+	$(BUILD_DIR) $(CLIENT_EXECUTABLE_FILE)
 
 
-OBJECTS = \
-	$(BUILD_DIR)/Main.o \
+
+SERVER_OBJECTS = \
 	$(BUILD_DIR)/DataBase.o \
 	$(BUILD_DIR)/User.o \
 	$(BUILD_DIR)/ErrorHandler.o \
+	$(BUILD_DIR)/CommandHandler.o \
 	$(BUILD_DIR)/Server.o \
+
+CLIENT_OBJECTS = \
+	$(BUILD_DIR)/ErrorHandler.o \
 	$(BUILD_DIR)/Client.o \
 
-
-MainSensitivityList = \
-	$(SRC_DIR)/Main.cpp \
-	$(INCLUDE_DIR)/include.hpp
 
 DataBaseSensitivityList = \
 	$(SRC_DIR)/DataBase.cpp \
@@ -26,49 +30,55 @@ DataBaseSensitivityList = \
 
 UserSensitivityList = \
 	$(SRC_DIR)/User.cpp \
-	$(INCLUDE_DIR)/User.h
+	$(INCLUDE_DIR)/User.hpp
 
 ErrorHandlerSensitivityList = \
 	$(SRC_DIR)/ErrorHandler.cpp \
-	$(INCLUDE_DIR)/ErrorHandler.h
+	$(INCLUDE_DIR)/ErrorHandler.hpp
 
-ErrorHandlerSensitivityList = \
+CommandHandlerSensitivityList = \
+	$(SRC_DIR)/CommandHandler.cpp \
+	$(INCLUDE_DIR)/CommandHandler.hpp
+
+ServerSensitivityList = \
 	$(SRC_DIR)/Server.cpp \
-	$(INCLUDE_DIR)/Server.h
+	$(INCLUDE_DIR)/Server.hpp
 
-ErrorHandlerSensitivityList = \
+ClientSensitivityList = \
 	$(SRC_DIR)/Client.cpp \
-	$(INCLUDE_DIR)/Client.h
+	$(INCLUDE_DIR)/Client.hpp
 
-
-all: $(BUILD_DIR) $(EXECUTABLE_FILE)
 
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(BUILD_DIR)/Main.o: $(CommandHandlerSensitivityList)
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/Main.cpp -o $(BUILD_DIR)/Main.o
-
-$(BUILD_DIR)/DataBase.o: $(CarwashSensitivityList)
+$(BUILD_DIR)/DataBase.o: $(DataBaseSensitivityList)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/DataBase.cpp -o $(BUILD_DIR)/DataBase.o
 
-$(BUILD_DIR)/User.o: $(StageSensitivityList)
+$(BUILD_DIR)/User.o: $(UserSensitivityList)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/User.cpp -o $(BUILD_DIR)/User.o
 
-$(BUILD_DIR)/ErrorHandler.o: $(StageSensitivityList)
+$(BUILD_DIR)/ErrorHandler.o: $(ErrorHandlerSensitivityList)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ErrorHandler.cpp -o $(BUILD_DIR)/ErrorHandler.o
 
-$(BUILD_DIR)/Server.o: $(StageSensitivityList)
+$(BUILD_DIR)/CommandHandler.o: $(CommandHandlerSensitivityList)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/CommandHandler.cpp -o $(BUILD_DIR)/CommandHandler.o
+
+$(BUILD_DIR)/Server.o: $(ServerSensitivityList)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/Server.cpp -o $(BUILD_DIR)/Server.o
 
-$(BUILD_DIR)/Client.o: $(StageSensitivityList)
+$(BUILD_DIR)/Client.o: $(ClientSensitivityList)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/Client.cpp -o $(BUILD_DIR)/Client.o
 
 
+$(SERVER_EXECUTABLE_FILE): $(SERVER_OBJECTS)
+	$(CC) $(CFLAGS) $(SERVER_OBJECTS) -o $(SERVER_EXECUTABLE_FILE)
 
-$(EXECUTABLE_FILE): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXECUTABLE_FILE)
+$(CLIENT_EXECUTABLE_FILE): $(CLIENT_OBJECTS)
+	$(CC) $(CFLAGS) $(CLIENT_OBJECTS) -o $(CLIENT_EXECUTABLE_FILE)
+
+
 
 .PHONY: clean
 clean:

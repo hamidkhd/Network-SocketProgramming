@@ -18,12 +18,8 @@
 #include <fcntl.h>
 #include <errno.h> 
 #include <exception>
-
-#include "DataBase.hpp"
-#include "User.hpp"
 #include "json.hpp"
-#include "Server.hpp"
-#include "Client.hpp"
 #include "ErrorHandler.hpp"
+#include "Response.hpp"
 
 #endif

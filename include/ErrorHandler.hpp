@@ -1,5 +1,5 @@
-#ifndef _ERROR_HANDLER_
-#define _ERROR_HANDLER_
+#ifndef ERRORHANDLER
+#define ERRORHANDLER
 
 #include "include.hpp"
 
@@ -18,6 +18,8 @@
 #define BIND_FAILED "Bind failed."
 #define LISTEN_FAILED "Listen failed."
 #define ACCEPT_FAILED "Accept failed."
+#define SEND_DATA_FAILED "Send data failed."
+#define RECIVE_DATA_FAILED "Recive data failed."
 
 
 class UserNotLoggin : public std::exception {
@@ -147,6 +149,26 @@ class AcceptFailed : public std::exception {
     public:
     	AcceptFailed();
         ~AcceptFailed();
+    	const char *what() const throw();
+};
+
+class SendDataFailed : public std::exception {
+    private:
+    	std::string message;
+
+    public:
+    	SendDataFailed();
+        ~SendDataFailed();
+    	const char *what() const throw();
+};
+
+class ReciveDataFailed : public std::exception {
+    private:
+    	std::string message;
+
+    public:
+    	ReciveDataFailed();
+        ~ReciveDataFailed();
     	const char *what() const throw();
 };
 

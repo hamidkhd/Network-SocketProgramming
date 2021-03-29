@@ -39,8 +39,12 @@ void DataBase::parse_json() {
 
 }
 
-void DataBase::check() {
-    for (long unsigned int i = 0; i < users.size(); i++) {
-        users[i].check();
-    }
+std::vector <User> DataBase::get_users() {
+    return users;
 }
+
+//void DataBase::check() {
+//    for (long unsigned int i = 0; i < users.size(); i++) {
+//        users[i].check();
+//    }
+//}

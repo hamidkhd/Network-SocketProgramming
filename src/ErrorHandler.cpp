@@ -134,11 +134,33 @@ const char *ListenFailed::what() const throw() {
 
 
 AcceptFailed::AcceptFailed() {
-	message = LISTEN_FAILED;
+	message = ACCEPT_FAILED;
 }
 
 AcceptFailed::~AcceptFailed() {}
 
 const char *AcceptFailed::what() const throw() {
+	return message.c_str();
+}
+
+
+SendDataFailed::SendDataFailed() {
+	message = SEND_DATA_FAILED;
+}
+
+SendDataFailed::~SendDataFailed() {}
+
+const char *SendDataFailed::what() const throw() {
+	return message.c_str();
+}
+
+
+ReciveDataFailed::ReciveDataFailed() {
+	message = RECIVE_DATA_FAILED;
+}
+
+ReciveDataFailed::~ReciveDataFailed() {}
+
+const char *ReciveDataFailed::what() const throw() {
 	return message.c_str();
 }

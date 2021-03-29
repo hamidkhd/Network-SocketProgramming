@@ -2,6 +2,7 @@
 #define DATABASE 
 
 #include "include.hpp"
+#include "User.hpp"
 
 class User; 
 
@@ -16,7 +17,8 @@ class DataBase {
         ~DataBase();
         void readFile(std::string);
         void parse_json();
-        void check();
+        std::vector <User> get_users();
+        //void check();
 };
 
 #endif 

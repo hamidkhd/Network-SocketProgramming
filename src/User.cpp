@@ -6,15 +6,35 @@ User::User(std::string _username, std::string _password, std::string _admin_stat
 
 User::~User() {}
 
-void User::check() {
-    std::cout << "new user: " << std::endl;
-
-    std::cout << this->username << std::endl;
-    std::cout << this->password << std::endl;
-    std::cout << this->admin_status << std::endl;
-    std::cout << this->size << std::endl;
-
-    for (long unsigned int i = 0; i < accessible_files.size(); i++) {
-        std::cout << accessible_files[i] << std::endl;
-    }
+std::string User::get_username() {
+    return username;
 }
+
+std::string User::get_password() {
+    return password;
+}
+
+std::string User::get_admin_status() {
+    return admin_status;
+}
+
+int User::get_size() {
+    return size;
+}
+
+std::vector <std::string> User::get_accessible_files() {
+    return accessible_files;
+}
+
+//void User::check() {
+//    std::cout << "new user: " << std::endl;
+//
+//    std::cout << this->username << std::endl;
+//    std::cout << this->password << std::endl;
+//    std::cout << this->admin_status << std::endl;
+//    std::cout << this->size << std::endl;
+//
+//    for (long unsigned int i = 0; i < accessible_files.size(); i++) {
+//        std::cout << accessible_files[i] << std::endl;
+//    }
+//}

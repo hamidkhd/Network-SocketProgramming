@@ -15,7 +15,12 @@ class User {
 	public:
 		User(std::string _username, std::string _password, std::string _admin_status, int _size, std::vector <std::string> _accessible_files);
 		~User();
-		void check();
+		std::string get_username();
+		std::string get_password();
+		std::string get_admin_status();
+		int get_size();
+		std::vector <std::string> get_accessible_files();
+		//void check();
 };
 
 #endif 
