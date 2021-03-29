@@ -76,9 +76,17 @@ std::string CommandHandler::handle_command(int client_fd) {
 			else
 				throw WritingError();
 		}
-		return CHANGE_DIR_SUCCESS;
+		return CHANGE_SUCCESS;
 	} else if (input_words[0] == "rename") {
-
+		if (user == nullptr)
+			throw UserNotLoggin();
+		if (input_words.size() < 3)
+			throw WritingError();
+		std::string file_name = user->get_cwd() + "/" + input_words[1];
+		std::string new_name = user->get_cwd() + "/" + input_words[2];
+		if (std::rename(file_name.c_str(), new_name.c_str()) < 0)
+			throw WritingError();
+		return CHANGE_SUCCESS;
 	} else if (input_words[0] == "retr") {
 
 	} else if (input_words[0] == "help") {
