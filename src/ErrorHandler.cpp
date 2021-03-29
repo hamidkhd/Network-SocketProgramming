@@ -21,6 +21,16 @@ const char *WritingError::what() const throw() {
 	return message.c_str();
 }
 
+BadSequence::BadSequence() {
+	message = BAD_SEQUENCE;
+}
+
+BadSequence::~BadSequence() {}
+
+const char *BadSequence::what() const throw() {
+	return message.c_str();
+}
+
 
 DefaultError::DefaultError() {
 	message = DEFAULT_ERROR;

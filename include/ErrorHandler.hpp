@@ -6,6 +6,7 @@
 #define USER_NOT_LOGGIN "332: Need account for login."
 #define WRITING_ERROR "501: Syntax error in parameters or arguments."
 #define DEFAULT_ERROR "500: Error"
+#define BAD_SEQUENCE "503: Bad sequence of commands"
 #define FULL_CAPACITY "425: Can't open data connection."
 #define USER_NOT_FOUND "430: Invalid username or password"
 #define ILLEGAL_ACCESS "550: File unavailable."
@@ -69,6 +70,16 @@ class UserNotFound : public std::exception {
     public:
     	UserNotFound();
         ~UserNotFound();
+    	const char *what() const throw();
+};
+
+class BadSequence : public std::exception {
+    private:
+    	std::string message;
+
+    public:
+    	BadSequence();
+        ~BadSequence();
     	const char *what() const throw();
 };
 
