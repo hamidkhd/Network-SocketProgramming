@@ -16,10 +16,9 @@ class CommandHandler {
     public:
         CommandHandler();
         ~CommandHandler();
-        std::string run_command_handler(std::string input);
+        std::string run_command_handler(std::string input, int client_fd);
         void separate_input_to_words(std::string input);
-        std::string handle_command();
-        bool confirm_username(std::string username);
+        std::string handle_command(int client_fd);
 };
 
 #endif 

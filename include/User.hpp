@@ -9,6 +9,7 @@ class User {
     	std::string username;
     	std::string password;
     	std::string admin_status;
+		bool authenticated;
         int size;
 		std::vector <std::string> accessible_files;
 
@@ -19,6 +20,8 @@ class User {
 		std::string get_password();
 		std::string get_admin_status();
 		int get_size();
+		void login(std::string pw);
+		void logout();
 		std::vector <std::string> get_accessible_files();
 		//void check();
 };

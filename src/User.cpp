@@ -2,7 +2,9 @@
 
 
 User::User(std::string _username, std::string _password, std::string _admin_status, int _size, std::vector <std::string> _accessible_files) 
-    : username(_username), password(_password), admin_status(_admin_status), size(_size), accessible_files(_accessible_files) {}
+    : username(_username), password(_password), admin_status(_admin_status), size(_size), accessible_files(_accessible_files) {
+        authenticated = false;
+    }
 
 User::~User() {}
 
@@ -20,6 +22,19 @@ std::string User::get_admin_status() {
 
 int User::get_size() {
     return size;
+}
+
+void User::login(std::string pw) {
+    if (pw == password)
+        authenticated = true;
+    else
+        throw UserNotFound();
+}
+
+void User::logout() {
+    if (!authenticated)
+        throw BadSequence();
+    authenticated = false;
 }
 
 std::vector <std::string> User::get_accessible_files() {
