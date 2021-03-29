@@ -22,7 +22,7 @@ class DataBase {
         User* get_user(std::string username);
         User* get_user(int fd);
         void set_user_fd(int fd, User* user);
-        //void check();
+        void remove_user_fd(int fd);
 };
 
 #endif 

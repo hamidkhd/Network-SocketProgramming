@@ -15,7 +15,6 @@ std::string CommandHandler::run_command_handler(std::string input, int client_fd
 	catch (std::exception &ex) {
 		return ex.what();
 	}
-	return ""; //for warning
 }
 
 void CommandHandler::separate_input_to_words(std::string input) {
@@ -31,9 +30,6 @@ void CommandHandler::separate_input_to_words(std::string input) {
             temp_word += x;
     }
     input_words.push_back(temp_word);
-
-	//for (long unsigned int i = 0; i < input_words.size(); i++)
-	//	std::cout << input_words[i] << std::endl;
 }
 
 std::string CommandHandler::handle_command(int client_fd) {
@@ -123,6 +119,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 		if (user == nullptr)
 			throw BadSequence();
 		user->logout();
+		data_base->remove_user_fd(client_fd);
 		return LOGOUT_SUCCESS;
 	}
 

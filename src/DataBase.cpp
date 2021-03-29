@@ -61,8 +61,6 @@ void DataBase::set_user_fd(int fd, User* user) {
     fd_users[fd] = user;
 }
 
-//void DataBase::check() {
-//    for (long unsigned int i = 0; i < users.size(); i++) {
-//        users[i].check();
-//    }
-//}
+void DataBase::remove_user_fd(int fd) {
+    fd_users.erase(fd);
+}
