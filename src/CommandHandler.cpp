@@ -57,8 +57,36 @@ std::string CommandHandler::handle_command(int client_fd) {
 			throw UserNotLoggin();
 		return "257: " + user->get_cwd();
 	} else if (input_words[0] == "mkd") {
-
+		if (user == nullptr)
+			throw UserNotLoggin();
+		if (input_words.size() < 2)
+			throw WritingError();
+		std::string path = user->get_cwd() + "/" + input_words[1];
+		mkdir(path.c_str(), 0777);
+		return "257: " + path + " created.";
 	} else if (input_words[0] == "dele") {
+		if (user == nullptr)
+			throw UserNotLoggin();
+		if (input_words.size() < 3)
+			throw WritingError();
+		
+		struct stat sb;
+		std::string path = user->get_cwd() + "/" + input_words[2];
+		if (input_words[1] == "-f") {
+			if (stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode))
+				remove(path.c_str());
+			else
+				throw WritingError();
+		} else if (input_words[1] == "-d") {
+			if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+				system(("rm -rf " + path).c_str());
+			else 
+				throw WritingError();
+		} else {
+			throw WritingError();
+		}
+
+		return "250: " + path + " deleted";
 
 	} else if (input_words[0] == "ls") {
 
