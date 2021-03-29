@@ -12,6 +12,7 @@ class User {
 		bool authenticated;
         int size;
 		std::vector <std::string> accessible_files;
+		std::string curr_dir;
 
 	public:
 		User(std::string _username, std::string _password, std::string _admin_status, int _size, std::vector <std::string> _accessible_files);
@@ -22,8 +23,8 @@ class User {
 		int get_size();
 		void login(std::string pw);
 		void logout();
+		std::string get_cwd();
 		std::vector <std::string> get_accessible_files();
-		//void check();
 };
 
 #endif 

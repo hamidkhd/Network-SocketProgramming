@@ -49,7 +49,9 @@ std::string CommandHandler::handle_command(int client_fd) {
 		return LOGIN_SUCCESS;
 		
 	} else if (input_words[0] == "pwd") {
-
+		if (user == nullptr)
+			throw UserNotLoggin();
+		return "257: " + user->get_cwd();
 	} else if (input_words[0] == "mkd") {
 
 	} else if (input_words[0] == "dele") {
