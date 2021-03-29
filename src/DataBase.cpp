@@ -32,15 +32,33 @@ void DataBase::parse_json() {
         std::string size = user_data["size"].get<std::string>();
 
         if (admin_status == "true")
-            this->users.push_back(*new User(username, password, admin_status, stoi(size), _accessible_files));
+            this->users.push_back(new User(username, password, admin_status, stoi(size), _accessible_files));
         else 
-            this->users.push_back(*new User(username, password, admin_status, stoi(size), empty));
+            this->users.push_back(new User(username, password, admin_status, stoi(size), empty));
     }
 
 }
 
-std::vector <User> DataBase::get_users() {
+std::vector <User*> DataBase::get_users() {
     return users;
+}
+
+User* DataBase::get_user(std::string username) {
+    for (User* user: users) {
+		if (username == user->get_username())
+			return user;
+    }
+    throw UserNotFound();
+}
+
+User* DataBase::get_user(int fd) {
+    if (fd_users.count(fd))
+        return fd_users[fd];
+    return nullptr;
+}
+
+void DataBase::set_user_fd(int fd, User* user) {
+    fd_users[fd] = user;
 }
 
 //void DataBase::check() {
