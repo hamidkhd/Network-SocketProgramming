@@ -36,51 +36,50 @@ void Server::initial_socket() {
 
     if (listen(this->command_socket, 3) < 0) 
 		throw ListenFailed();
-
-	if ((this->new_command_socket = accept(this->command_socket, (struct sockaddr *)&this->command_addr, (socklen_t*)&command_addr_len)) < 0) 
-		throw AcceptFailed();
 }
 
-std::string Server::recive_data_from_client()
-{
-	//int command_addr_len = sizeof(this->command_addr); 
 
-	//if ((this->new_command_socket = accept(this->command_socket, (struct sockaddr *)&this->command_addr, (socklen_t*)&command_addr_len)) < 0) 
-	//	throw AcceptFailed();
+void Server::run() {
+	int command_addr_len = sizeof(command_addr); 
+	fd_set master_set, working_set;
+	int new_socket;
 
-	char buffer[1024] = {0};
+	FD_ZERO(&master_set);
+	int max_sd = command_socket;
+	FD_SET(command_socket, &master_set);
 
-	// *** recive file with error ***
+	while(true) {
+		working_set = master_set;
+        select(max_sd + 1, &working_set, NULL, NULL, NULL);
 
-	//if (recv(this->new_command_socket, buffer, 1024, 0) < 0)
-	//	throw ReciveDataFailed();
-
-	recv(this->new_command_socket, buffer, 1024, 0);
-
-	//close(this->new_command_socket);
-
-	return buffer;
-}
-
-void Server::send_response_to_client(std::string data) {
-	//if (send(this->new_command_socket, data.data(), data.size(), 0) < 0)
-	//	throw SendDataFailed();
-	send(this->new_command_socket, data.data(), data.size(), 0);
+        for (int i = 0; i <= max_sd; i++) {
+            if (FD_ISSET(i, &working_set)) {
+                if (i == command_socket) { // new client connected
+                    new_socket =  accept(this->command_socket, (struct sockaddr *)&this->command_addr, (socklen_t*)&command_addr_len);
+                    FD_SET(new_socket, &master_set);
+                    if (new_socket > max_sd)
+                        max_sd = new_socket;
+                }
+                else { // new message from a client
+					char buffer[1024] = {0};
+                    if (recv(i , buffer, 1024, 0) == 0) {
+						close(i);
+						FD_CLR(i, &master_set);
+					} else {
+                    	std::string resp = command_handler->run_command_handler(buffer, i);
+						send(i, resp.data(), resp.size(), 0);
+					}
+                }
+            }
+        }
+	}
+	
 }
 
 int main(int argc, char const *argv[]) {
 	Server *server = new Server();
 
-	while (true) {
-		try {			
-			std::string command = server->recive_data_from_client();
-			std::string response = server->command_handler->run_command_handler(command);
-			server->send_response_to_client(response);
-		}
-		catch (std::exception &ex) {
-			std::cout << ex.what() << std::endl;
-		}
-	}
+	server->run();	
 
 	return 0;	
 }
