@@ -1,6 +1,8 @@
 #ifndef _COMMAND_HANDLER_
 #define _COMMAND_HANDLER_
 
+#include <sys/stat.h>
+
 #include "include.hpp"
 #include "DataBase.hpp"
 

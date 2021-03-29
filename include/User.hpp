@@ -24,6 +24,7 @@ class User {
 		void login(std::string pw);
 		void logout();
 		std::string get_cwd();
+		void set_cwd(std::string dir);
 		std::vector <std::string> get_accessible_files();
 };
 

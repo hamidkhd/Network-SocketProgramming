@@ -29,6 +29,10 @@ std::string User::get_cwd() {
     return curr_dir;
 }
 
+void User::set_cwd(std::string dir) {
+    curr_dir = dir;
+}
+
 void User::login(std::string pw) {
     if (pw == password)
         authenticated = true;

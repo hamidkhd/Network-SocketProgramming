@@ -39,10 +39,14 @@ void CommandHandler::separate_input_to_words(std::string input) {
 std::string CommandHandler::handle_command(int client_fd) {
 	User* user = data_base->get_user(client_fd);
 	if (input_words[0] == "user") {
+		if (input_words.size() == 1)
+			throw WritingError();
 		user = this->data_base->get_user(input_words[1]);
 		this->data_base->set_user_fd(client_fd, user);
 		return SUCCESS_USERNAME_FINDING;
 	} else if (input_words[0] == "pass") {
+		if (input_words.size() == 1)
+			throw WritingError();
 		if (user == nullptr)
 			throw BadSequence();
 		user->login(input_words[1]);
@@ -59,7 +63,20 @@ std::string CommandHandler::handle_command(int client_fd) {
 	} else if (input_words[0] == "ls") {
 
 	} else if (input_words[0] == "cwd") {
-
+		if (user == nullptr)
+			throw UserNotLoggin();
+		if (input_words.size() == 1) {
+			user->set_cwd(getenv("PWD"));
+		} else {
+			struct stat sb;
+			std::string path = user->get_cwd() + "/" + input_words[1];
+			std::cout << path << std::endl;
+			if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+				user->set_cwd(path);
+			else
+				throw WritingError();
+		}
+		return CHANGE_DIR_SUCCESS;
 	} else if (input_words[0] == "rename") {
 
 	} else if (input_words[0] == "retr") {
