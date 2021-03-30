@@ -44,20 +44,25 @@ void Client::send_data_to_server(std::string data)
 		throw SendDataFailed();
 }
 
-std::string Client::receive_response_from_client() {
+std::string Client::receive_response(int sock) {
 	char buffer[1024] = {0};
-	recv(this->command_socket, buffer, 1024, 0);
+	recv(sock, buffer, 1024, 0);
 	return buffer;
 }
 
 void Client::handle_response(std::string res) {
 	if (res == "connect") {
+		std::cout << "in connect" << std::endl;
 		connect(data_socket, (struct sockaddr *)&data_addr, sizeof(data_addr));
-		handle_response(receive_response_from_client());
+		handle_response(receive_response(command_socket));
 		return;
-	} else {
-		std::cout << res << std::endl;
+	} else if (res.substr(0,3) == "221") {
+		close(data_socket);
+		data_socket = socket(AF_INET, SOCK_STREAM, 0);
 	}
+	
+	
+	std::cout << res << std::endl;
 }
 
 
@@ -67,7 +72,7 @@ void Client::run() {
 		try {			
 			getline(std::cin, command);
 			send_data_to_server(command);	
-			response = receive_response_from_client();
+			response = receive_response(command_socket);
 			handle_response(response);
 		}
 		catch (std::exception &ex) {

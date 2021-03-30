@@ -17,13 +17,13 @@ private:
     struct sockaddr_in data_addr; 
     void handle_response(std::string res);
     void connect_data_sock();
+    void connect_to_server();
+    void send_data_to_server(std::string data);
+    std::string receive_response(int sock);
 
 public:
     Client();
     ~Client();
-    void connect_to_server();
-    void send_data_to_server(std::string data);
-    std::string receive_response_from_client();
     void run();
 };
 
