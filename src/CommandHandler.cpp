@@ -114,8 +114,33 @@ std::string CommandHandler::handle_command(int client_fd) {
 
 		return "250: " + path + " deleted";
 
-	} else if (input_words[0] == "ls") {
+	} else if (input_words[0] == "ls") { //TODO: ls
+		if (user == nullptr || !user->is_loggedin())
+			throw UserNotLoggin();
+		
+		int data_fd = data_base->get_command_fd(client_fd);
+		char tmp[100] = {0};
+		strcpy(tmp, "ls");
+		send(client_fd, tmp, strlen(tmp), 0);
+		std::vector<std::string> dir_list;
+		std::string result;
+    	DIR *d;
+    	struct dirent *dir;
+    	d = opendir(user->get_cwd().c_str());
+    	if (d) {
+    	    while ((dir = readdir(d)) != NULL)
+    	        dir_list.push_back(dir->d_name);
+    	    closedir(d);
+    	}
+    	sort(dir_list.begin(), dir_list.end());
+    	for(std::string dir_name: dir_list)
+    	    result.append(dir_name + "\n");
 
+		if (fork()==0) {
+			send(data_fd, result.data(), result.size(), 0);
+			exit(0);
+		}
+		return LIST_TRANSFER_SUCCESS;
 	} else if (input_words[0] == "cwd") {
 		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
@@ -145,7 +170,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 
 	} else if (input_words[0] == "help") {
 
-	} else if (input_words[0] == "quit") {
+	} else if (input_words[0] == "quit") { //TODO: close socket
 		if (user == nullptr || !user->is_loggedin())
 			throw BadSequence();
 		user->logout();

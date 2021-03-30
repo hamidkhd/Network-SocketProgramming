@@ -2,6 +2,9 @@
 #define _COMMAND_HANDLER_
 
 #include <sys/stat.h>
+#include <dirent.h>
+#include <vector>
+#include <algorithm>
 
 #include "include.hpp"
 #include "DataBase.hpp"

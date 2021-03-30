@@ -52,9 +52,16 @@ std::string Client::receive_response(int sock) {
 
 void Client::handle_response(std::string res) {
 	if (res == "connect") {
-		std::cout << "in connect" << std::endl;
 		connect(data_socket, (struct sockaddr *)&data_addr, sizeof(data_addr));
 		handle_response(receive_response(command_socket));
+		return;
+	} else if (res.length() > 1 && res.substr(0,2) == "ls") {
+		std::string data_res = receive_response(data_socket);
+		std::cout << data_res << std::endl;
+		if (res.length() == 2)
+			handle_response(receive_response(command_socket));
+		else 
+			std::cout << res.substr(2) << std::endl;	
 		return;
 	} else if (res.substr(0,3) == "221") {
 		close(data_socket);
