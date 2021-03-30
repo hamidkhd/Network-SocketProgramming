@@ -22,6 +22,16 @@ class CommandHandler {
         DataBase* data_base;
         int data_socket;
 
+        void mkd(int client_fd, User* user);
+        void dele(User* user);
+        void ls(int client_fd, User* user);
+        void cwd(User* user);
+        void rename_command(User* user);
+        void retr(int client_fd, User* user);
+        void user_command(int client_fd, User* user);
+        void pass_command(int client_fd, User* user);
+        void quit(int client_fd, User* user);
+
     public:
         CommandHandler();
         ~CommandHandler();

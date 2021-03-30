@@ -50,6 +50,24 @@ std::string Client::receive_response(int sock) {
 	return buffer;
 }
 
+void Client::receive_file(std::string res) {
+	char buffer[1024] = {0};
+	mkdir("downloads", 0777);
+	int len = res.find("$") - res.find("#") - 1;
+	off_t file_len = std::stol(res.substr(res.find('#') +1, len));
+	std::string file_path = "downloads/" + res.substr(3,  res.find('#')-3);
+	int file_fd = open(file_path.c_str(), O_RDWR | O_CREAT, 0777);
+	int total_read = 0;
+	int last_read = 0;
+	while (total_read < file_len) {
+		last_read = recv(data_socket, buffer, 1024, 0);
+		write(file_fd, buffer, last_read);
+		memset(buffer, 0, 1024);
+		total_read += last_read;
+	}
+    close(file_fd);
+}
+
 void Client::handle_response(std::string res) {
 	if (res == "connect") {
 		connect(data_socket, (struct sockaddr *)&data_addr, sizeof(data_addr));
@@ -64,22 +82,7 @@ void Client::handle_response(std::string res) {
 			std::cout << res.substr(2) << std::endl;	
 		return;
 	} else if (res.length() > 1 && res.substr(0,2) == "dl") {
-		char buffer[1024] = {0};
-		mkdir("downloads", 0777);
-		int len = res.find("$") - res.find("#") - 1;
-		off_t file_len = std::stol(res.substr(res.find('#') +1, len));
-		std::string file_path = "downloads/" + res.substr(3,  res.find('#')-3);
-		int file_fd = open(file_path.c_str(), O_RDWR | O_CREAT, 0777);
-		int total_read = 0;
-		int last_read = 0;
-		while (total_read < file_len) {
-			last_read = recv(data_socket, buffer, 1024, 0);
-			write(file_fd, buffer, last_read);
-			memset(buffer, 0, 1024);
-			total_read += last_read;
-		}
-    	close(file_fd);
-
+		receive_file(res);
 		if (res.length() == res.find('$')+1)
 			handle_response(receive_response(command_socket));
 		else 

@@ -22,6 +22,7 @@ private:
     void connect_to_server();
     void send_data_to_server(std::string data);
     std::string receive_response(int sock);
+    void receive_file(std::string response);
 
 public:
     Client();
