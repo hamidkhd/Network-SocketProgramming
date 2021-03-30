@@ -10,20 +10,21 @@
 
 
 class Client {
-    private:
-        int command_socket;
-        int data_socket;
-        struct sockaddr_in command_addr; 
-        struct sockaddr_in data_addr; 
-        std::string input_command;
+private:
+    int command_socket;
+    int data_socket;
+    struct sockaddr_in command_addr; 
+    struct sockaddr_in data_addr; 
+    void handle_response(std::string res);
+    void connect_data_sock();
 
-    public:
-        Client();
-        ~Client();
-        void connect_to_server();
-        std::string get_input_from_user();
-        void send_data_to_server(std::string data);
-        std::string recive_response_from_client();
+public:
+    Client();
+    ~Client();
+    void connect_to_server();
+    void send_data_to_server(std::string data);
+    std::string receive_response_from_client();
+    void run();
 };
 
 #endif

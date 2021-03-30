@@ -64,3 +64,17 @@ void DataBase::set_user_fd(int fd, User* user) {
 void DataBase::remove_user_fd(int fd) {
     fd_users.erase(fd);
 }
+
+int DataBase::get_command_fd(int data_fd) {
+    if (command_fds.count(data_fd))
+        return command_fds[data_fd];
+    return -1;
+}
+
+void DataBase::set_command_fd(int data_fd, int command_fd) {
+    command_fds[data_fd] = command_fd;
+}
+
+void DataBase::remove_command_fd(int fd) {
+    command_fds.erase(fd);
+}

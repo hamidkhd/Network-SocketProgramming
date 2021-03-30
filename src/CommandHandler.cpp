@@ -3,6 +3,21 @@
 
 CommandHandler::CommandHandler() {
 	this->data_base = new DataBase();
+	int opt = 1;
+	struct sockaddr_in server_addr;
+	data_socket = socket(AF_INET, SOCK_STREAM, 0);
+    setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    // opt = fcntl(data_socket, F_GETFL);
+    // opt = (opt | O_NONBLOCK);
+    // fcntl(data_socket, F_SETFL, opt);
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(DATA_PORT);
+       
+    bind(data_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+    listen(data_socket, 4);
 }
 
 CommandHandler::~CommandHandler() {}
@@ -32,6 +47,19 @@ void CommandHandler::separate_input_to_words(std::string input) {
     input_words.push_back(temp_word);
 }
 
+int CommandHandler::create_data_connection(int fd) {
+	char buff[100] = {0};
+	strcpy(buff, "connect");
+	send(fd, buff, strlen(buff), 0);
+	struct sockaddr_in client_addr;
+	int addrlen = sizeof(client_addr);
+	memset(&client_addr, 0, sizeof(client_addr));
+    int new_socket = accept(data_socket, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen);
+	if (new_socket < 0) 
+		throw ConnectionFailed();
+	return new_socket;
+}
+
 std::string CommandHandler::handle_command(int client_fd) {
 	User* user = data_base->get_user(client_fd);
 	if (input_words[0] == "user") {
@@ -46,9 +74,11 @@ std::string CommandHandler::handle_command(int client_fd) {
 		if (user == nullptr)
 			throw BadSequence();
 		user->login(input_words[1]);
+		int sock = create_data_connection(client_fd);
+		data_base->set_command_fd(client_fd, sock);
 		return LOGIN_SUCCESS;
 		
-	} else if (input_words[0] == "pwd") {
+	} else if (input_words[0] == "pwd") { // TODO: Fix allowing user who used "user" but hasn't entered "pass"
 		if (user == nullptr)
 			throw UserNotLoggin();
 		return "257: " + user->get_cwd();
