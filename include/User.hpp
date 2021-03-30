@@ -23,6 +23,7 @@ class User {
 		int get_size();
 		void login(std::string pw);
 		void logout();
+		bool is_loggedin();
 		std::string get_cwd();
 		void set_cwd(std::string dir);
 		std::vector <std::string> get_accessible_files();

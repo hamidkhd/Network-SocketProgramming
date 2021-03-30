@@ -71,19 +71,19 @@ std::string CommandHandler::handle_command(int client_fd) {
 	} else if (input_words[0] == "pass") {
 		if (input_words.size() == 1)
 			throw WritingError();
-		if (user == nullptr)
+		if (user == nullptr || user->is_loggedin())
 			throw BadSequence();
 		user->login(input_words[1]);
 		int sock = create_data_connection(client_fd);
 		data_base->set_command_fd(client_fd, sock);
 		return LOGIN_SUCCESS;
 		
-	} else if (input_words[0] == "pwd") { // TODO: Fix allowing user who used "user" but hasn't entered "pass"
-		if (user == nullptr)
+	} else if (input_words[0] == "pwd") {
+		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
 		return "257: " + user->get_cwd();
 	} else if (input_words[0] == "mkd") {
-		if (user == nullptr)
+		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
 		if (input_words.size() < 2)
 			throw WritingError();
@@ -91,7 +91,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 		mkdir(path.c_str(), 0777);
 		return "257: " + path + " created.";
 	} else if (input_words[0] == "dele") {
-		if (user == nullptr)
+		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
 		if (input_words.size() < 3)
 			throw WritingError();
@@ -117,7 +117,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 	} else if (input_words[0] == "ls") {
 
 	} else if (input_words[0] == "cwd") {
-		if (user == nullptr)
+		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
 		if (input_words.size() == 1) {
 			user->set_cwd(getenv("PWD"));
@@ -132,7 +132,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 		}
 		return CHANGE_SUCCESS;
 	} else if (input_words[0] == "rename") {
-		if (user == nullptr)
+		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
 		if (input_words.size() < 3)
 			throw WritingError();
@@ -146,7 +146,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 	} else if (input_words[0] == "help") {
 
 	} else if (input_words[0] == "quit") {
-		if (user == nullptr)
+		if (user == nullptr || !user->is_loggedin())
 			throw BadSequence();
 		user->logout();
 		data_base->remove_user_fd(client_fd);

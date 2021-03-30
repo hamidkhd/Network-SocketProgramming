@@ -46,6 +46,10 @@ void User::logout() {
     authenticated = false;
 }
 
+bool User::is_loggedin() {
+    return authenticated;
+}
+
 std::vector <std::string> User::get_accessible_files() {
     return accessible_files;
 }
