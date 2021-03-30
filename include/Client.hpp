@@ -1,6 +1,8 @@
 #ifndef _Client_
 #define _Client_ 
 
+#include <sys/stat.h>
+
 #include "include.hpp"
 
 #define COMMAND_PORT 8080 

@@ -114,7 +114,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 
 		return "250: " + path + " deleted";
 
-	} else if (input_words[0] == "ls") { //TODO: ls
+	} else if (input_words[0] == "ls") {
 		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
 		
@@ -141,7 +141,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 			exit(0);
 		}
 		return LIST_TRANSFER_SUCCESS;
-	} else if (input_words[0] == "cwd") {
+	} else if (input_words[0] == "cwd") { // TODO: remove .. from string
 		if (user == nullptr || !user->is_loggedin())
 			throw UserNotLoggin();
 		if (input_words.size() == 1) {
@@ -167,7 +167,35 @@ std::string CommandHandler::handle_command(int client_fd) {
 			throw WritingError();
 		return CHANGE_SUCCESS;
 	} else if (input_words[0] == "retr") {
+		if (user == nullptr || !user->is_loggedin())
+			throw UserNotLoggin();
+		if (input_words.size() < 2)
+			throw WritingError();
+		struct stat sb;
+		std::string path = user->get_cwd() + "/" + input_words[1];
+		if (stat(path.c_str(), &sb) != 0 || !S_ISREG(sb.st_mode))
+			throw WritingError();
 
+		int data_fd = data_base->get_command_fd(client_fd);
+		struct stat stat_buf; 
+		int file_fd = open(path.c_str() , O_RDONLY);
+        fstat (file_fd, &stat_buf);
+		char tmp[100] = {0};
+		strcpy(tmp, "dl ");
+		strcat(tmp, input_words[1].c_str());
+		strcat(tmp, "#");
+		strcat(tmp, std::to_string(stat_buf.st_size).c_str());
+		strcat(tmp, "$");
+		send(client_fd, tmp, strlen(tmp), 0);
+		if (fork() == 0) {
+        	sendfile(data_fd, file_fd, NULL, stat_buf.st_size);
+        	close(file_fd);
+			close(data_fd);
+			exit(0);
+		}
+		close(file_fd);
+		return DOWNLOAD_SUCCESS;
+		
 	} else if (input_words[0] == "help") {
 
 	} else if (input_words[0] == "quit") { //TODO: close socket

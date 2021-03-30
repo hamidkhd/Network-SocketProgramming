@@ -8,5 +8,6 @@
 #define LOGOUT_SUCCESS "221: Successful Quit."
 #define CHANGE_SUCCESS "250: Successful Change."
 #define LIST_TRANSFER_SUCCESS "226: List transfer done."
+#define DOWNLOAD_SUCCESS "226: Successful Download."
 
 #endif

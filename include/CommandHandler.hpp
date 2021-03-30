@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <vector>
 #include <algorithm>
+#include <sys/sendfile.h>
 
 #include "include.hpp"
 #include "DataBase.hpp"
