@@ -7,9 +7,6 @@ CommandHandler::CommandHandler() {
 	struct sockaddr_in server_addr;
 	data_socket = socket(AF_INET, SOCK_STREAM, 0);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-    // opt = fcntl(data_socket, F_GETFL);
-    // opt = (opt | O_NONBLOCK);
-    // fcntl(data_socket, F_SETFL, opt);
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
@@ -184,6 +181,8 @@ void CommandHandler::retr(int client_fd, User* user) {
 void CommandHandler::user_command(int client_fd, User* user) {
 	if (input_words.size() == 1)
 		throw WritingError();
+	if (user != nullptr && user->is_loggedin())
+    	throw BadSequence();
 	user = this->data_base->get_user(input_words[1]);
 	this->data_base->set_user_fd(client_fd, user);
 }
