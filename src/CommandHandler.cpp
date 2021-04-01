@@ -180,6 +180,9 @@ void CommandHandler::retr(int client_fd, User* user) {
 	std::string path = user->get_cwd() + "/" + input_words[1];
 	if (stat(path.c_str(), &sb) != 0 || !S_ISREG(sb.st_mode))
 		throw WritingError();
+	if (!user->can_download(sb.st_size))
+		throw FullCapacity();
+	user->subtract_size(sb.st_size);
 	
 	int data_fd = data_base->get_command_fd(client_fd);
 	struct stat stat_buf; 

@@ -10,7 +10,7 @@ class User {
     	std::string password;
     	bool admin_status;
 		bool authenticated;
-        int size;
+        uint size_limit;
 		std::string curr_dir;
 
 	public:
@@ -19,12 +19,13 @@ class User {
 		std::string get_username();
 		std::string get_password();
 		bool is_admin();
-		int get_size();
 		void login(std::string pw);
 		void logout();
 		bool is_loggedin();
 		std::string get_cwd();
 		void set_cwd(std::string dir);
+		bool can_download(uint size);
+		void subtract_size(uint size);
 };
 
 #endif 
