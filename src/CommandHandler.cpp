@@ -224,7 +224,7 @@ void CommandHandler::pass_command(int client_fd, User* user) {
 	data_base->set_command_fd(client_fd, sock);
 }
 
-std::string CommandHandler::help(User* user) {
+std::string CommandHandler::help(int client_fd, User* user) {
 	if (input_words.size() > 1)
 		throw WritingError(); 
 	
@@ -248,6 +248,14 @@ std::string CommandHandler::help(User* user) {
 	message += "10) RETR [name], Its argument is used to specify the file's name. It is used for download file with the given name, if available.\n";
 	message += "11) HELP, It is used to display commands on the server along with instructions for using them.\n";
 	message += "12) QUIT, It is used for logout and remove current user from the system.\n";
+
+	char tmp[100] = {0};
+	strcpy(tmp, "hp ");
+	strcat(tmp, std::to_string(message.size()).c_str());
+	strcat(tmp, "$");
+
+	if (send(client_fd, tmp, strlen(tmp), 0) < 0)
+		throw SendDataFailed();
 
 	return message;
 }
@@ -312,7 +320,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 	} 
 	
 	else if (input_words[0] == "help") { 
-		return help(user);
+		return help(client_fd, user);
 	} 
 	
 	else if (input_words[0] == "quit") { //TODO: close socket

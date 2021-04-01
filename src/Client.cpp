@@ -96,7 +96,24 @@ void Client::handle_response(std::string res) {
 		if ((data_socket = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL)) < 0) {
         	throw SocketCreationFailed();
 		}
-	}	
+	} else if (res.length() > 1 && res.substr(0,2) == "hp") {
+		off_t msg_len = std::stol(res.substr(3, res.find('$') - 2));
+		int total_read = res.size() > 1024 ? 1024 - res.find('$') - 1 : res.size() - res.find('$') - 1;
+		int last_read = 0;
+		if (total_read > 0)
+			std::cout << res.substr(res.find('$') + 1, total_read);
+		
+		char buffer[1024] = {0};
+		while (total_read < msg_len) {
+			if ((last_read = recv(command_socket, buffer, 1024, 0)) < 0) {
+			throw ReciveDataFailed();
+			}
+			printf("%.*s", last_read, buffer);
+			memset(buffer, 0, 1024);
+			total_read += last_read;
+		}
+		return;
+	}
 	
 	std::cout << res << std::endl;
 }

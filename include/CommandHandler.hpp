@@ -28,7 +28,7 @@ class CommandHandler {
         void retr(int client_fd, User* user);
         void user_command(int client_fd, User* user);
         void pass_command(int client_fd, User* user);
-        std::string help(User* user);
+        std::string help(int client_fd, User* user);
         void quit(int client_fd, User* user);
 
     public:
