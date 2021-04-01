@@ -10,47 +10,47 @@ Client::Client() {
 }
 
 Client::~Client() {
-	close(this->command_socket);
+	close(data_socket);
+	close(command_socket);
 }
 
 void Client::connect_to_server() {
-    this->command_addr.sin_family = AF_INET; 
-	this->command_addr.sin_port = htons(COMMAND_PORT);
+    command_addr.sin_family = AF_INET; 
+	command_addr.sin_port = htons(COMMAND_PORT);
 
-    if ((this->command_socket = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL)) < 0) {
+    if ((command_socket = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL)) < 0) {
         throw SocketCreationFailed();
 	}
 	
-	if (inet_pton(AF_INET, IP_ADDRESS, &this->command_addr.sin_addr) <= 0)
+	if (inet_pton(AF_INET, IP_ADDRESS, &command_addr.sin_addr) <= 0)
         throw AddressFailed();
 
-	if (connect(command_socket, (struct sockaddr *)&this->command_addr, sizeof(this->command_addr)) < 0)
+	if (connect(command_socket, (struct sockaddr *)&command_addr, sizeof(command_addr)) < 0)
         throw ConnectionFailed();
 
 	data_addr.sin_family = AF_INET; 
     data_addr.sin_port = htons(DATA_PORT); 
     data_addr.sin_addr.s_addr = inet_addr(IP_ADDRESS);
 
-	data_socket = socket(AF_INET, SOCK_STREAM, 0);
-}
-
-void Client::connect_data_sock() {
-
+	if ((data_socket = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL)) < 0) {
+        throw SocketCreationFailed();
+	}
 }
 
 void Client::send_data_to_server(std::string data)
 {
-	if (send(this->command_socket, data.data(), data.size(), 0) < 0)
+	if (send(command_socket, data.data(), data.size(), 0) < 0)
 		throw SendDataFailed();
 }
 
-std::string Client::receive_response(int sock) {
+std::string Client::receive_response_from_server(int sock) {
 	char buffer[1024] = {0};
-	recv(sock, buffer, 1024, 0);
+	if (recv(sock, buffer, 1024, 0) < 0)
+		throw ReciveDataFailed();
 	return buffer;
 }
 
-void Client::receive_file(std::string res) {
+void Client::receive_file_from_server(std::string res) {
 	char buffer[1024] = {0};
 	mkdir("downloads", 0777);
 	int len = res.find("$") - res.find("#") - 1;
@@ -60,7 +60,9 @@ void Client::receive_file(std::string res) {
 	int total_read = 0;
 	int last_read = 0;
 	while (total_read < file_len) {
-		last_read = recv(data_socket, buffer, 1024, 0);
+		if ((last_read = recv(data_socket, buffer, 1024, 0)) < 0) {
+			throw ReciveDataFailed();
+		}
 		write(file_fd, buffer, last_read);
 		memset(buffer, 0, 1024);
 		total_read += last_read;
@@ -70,29 +72,31 @@ void Client::receive_file(std::string res) {
 
 void Client::handle_response(std::string res) {
 	if (res == "connect") {
-		connect(data_socket, (struct sockaddr *)&data_addr, sizeof(data_addr));
-		handle_response(receive_response(command_socket));
+		if (connect(data_socket, (struct sockaddr *)&data_addr, sizeof(data_addr)) < 0)
+        	throw ConnectionFailed();
+		handle_response(receive_response_from_server(command_socket));
 		return;
 	} else if (res.length() > 1 && res.substr(0,2) == "ls") {
-		std::string data_res = receive_response(data_socket);
+		std::string data_res = receive_response_from_server(data_socket);
 		std::cout << data_res << std::endl;
 		if (res.length() == 2)
-			handle_response(receive_response(command_socket));
+			handle_response(receive_response_from_server(command_socket));
 		else 
 			std::cout << res.substr(2) << std::endl;	
 		return;
 	} else if (res.length() > 1 && res.substr(0,2) == "dl") {
-		receive_file(res);
+		receive_file_from_server(res);
 		if (res.length() == res.find('$')+1)
-			handle_response(receive_response(command_socket));
+			handle_response(receive_response_from_server(command_socket));
 		else 
 			std::cout << res.substr(res.find('$')+1) << std::endl;	
 		return;
 	} else if (res.substr(0,3) == "221") {
 		close(data_socket);
-		data_socket = socket(AF_INET, SOCK_STREAM, 0);
-	}
-	
+		if ((data_socket = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL)) < 0) {
+        	throw SocketCreationFailed();
+		}
+	}	
 	
 	std::cout << res << std::endl;
 }
@@ -104,7 +108,7 @@ void Client::run() {
 		try {			
 			getline(std::cin, command);
 			send_data_to_server(command);	
-			response = receive_response(command_socket);
+			response = receive_response_from_server(command_socket);
 			handle_response(response);
 		}
 		catch (std::exception &ex) {
@@ -115,6 +119,8 @@ void Client::run() {
 
 int main(int argc, char const *argv[]) {
 	Client *client = new Client();
+
 	client->run();
+
 	return 0;
 }

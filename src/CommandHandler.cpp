@@ -1,23 +1,32 @@
 #include "CommandHandler.hpp"
 
 
-CommandHandler::CommandHandler() {
-	this->data_base = new DataBase();
+CommandHandler::CommandHandler(DataBase* _data_base, Logger* _logger):
+	data_base(_data_base), logger(_logger) {
+	
 	int opt = 1;
-	struct sockaddr_in server_addr;
-	data_socket = socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(DATA_PORT);
+    data_addr.sin_family = AF_INET;
+    data_addr.sin_addr.s_addr = INADDR_ANY;
+    data_addr.sin_port = htons(DATA_PORT);
+
+	if ((data_socket = socket(AF_INET , SOCK_STREAM , IP_PROTOCOL)) == 0) {
+		throw SocketCreationFailed();
+	}
+
+    if (setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, (char *)&opt, sizeof(opt)) < 0) 
+		throw SetSockOptFailed(); 
        
-    bind(data_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+	if (bind(data_socket, (struct sockaddr *)&data_addr, sizeof(data_addr)) < 0) 
+		throw BindFailed();
 
-    listen(data_socket, 4);
+	if (listen(data_socket, 4) < 0) 
+		throw ListenFailed();
 }
 
-CommandHandler::~CommandHandler() {}
+CommandHandler::~CommandHandler() {
+	close(data_socket);
+}
 
 std::string CommandHandler::run_command_handler(std::string input, int client_fd) {
 	try {
@@ -30,7 +39,7 @@ std::string CommandHandler::run_command_handler(std::string input, int client_fd
 }
 
 void CommandHandler::separate_input_to_words(std::string input) {
-	this->input_words.clear();
+	input_words.clear();
 	std::string temp_word = "";
 
     for (auto x : input) {
@@ -47,13 +56,15 @@ void CommandHandler::separate_input_to_words(std::string input) {
 int CommandHandler::create_data_connection(int fd) {
 	char buff[100] = {0};
 	strcpy(buff, "connect");
-	send(fd, buff, strlen(buff), 0);
+	send(fd, buff, strlen(buff), 0); 
 	struct sockaddr_in client_addr;
-	int addrlen = sizeof(client_addr);
+	int addr_len = sizeof(client_addr);
 	memset(&client_addr, 0, sizeof(client_addr));
-    int new_socket = accept(data_socket, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen);
-	if (new_socket < 0) 
-		throw ConnectionFailed();
+	int new_socket;
+	if ((new_socket = accept(data_socket, (struct sockaddr *)&client_addr, (socklen_t*)&addr_len)) < 0) {
+		throw AcceptFailed();
+		// throw ConnectionFailed();
+	}
 	return new_socket;
 }
 
@@ -75,15 +86,20 @@ void CommandHandler::dele(User* user) {
 	struct stat sb;
 	std::string path = user->get_cwd() + "/" + input_words[2];
 	if (input_words[1] == "-f") {
+		if (!user->check_accessiblility_file(input_words[1]))
+		throw IllegalAccess();
+		
 		if (stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode))
 			remove(path.c_str());
 		else
 			throw WritingError();
+		logger->save_log("User with username: '" + user->get_username() + "' delete file with name: '" + input_words[2] +  "' successfully.");
 	} else if (input_words[1] == "-d") {
 		if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 			system(("rm -rf " + path).c_str());
 		else 
 			throw WritingError();
+		logger->save_log("User with username: '" + user->get_username() + "' delete directory with path: '" + input_words[2] +  "' successfully.");
 	} else {
 		throw WritingError();
 	}
@@ -96,7 +112,8 @@ void CommandHandler::ls(int client_fd, User* user) {
 	int data_fd = data_base->get_command_fd(client_fd);
 	char tmp[100] = {0};
 	strcpy(tmp, "ls");
-	send(client_fd, tmp, strlen(tmp), 0);
+	if (send(client_fd, tmp, strlen(tmp), 0) < 0)
+		throw SendDataFailed();
 	std::vector<std::string> dir_list;
 	std::string result;
     DIR *d;
@@ -114,7 +131,8 @@ void CommandHandler::ls(int client_fd, User* user) {
 	}
 
 	if (fork() == 0) {
-		send(data_fd, result.data(), result.size(), 0);
+		if (send(data_fd, result.data(), result.size(), 0) < 0)
+			throw SendDataFailed();
 		exit(0);
 	}
 }
@@ -140,10 +158,14 @@ void CommandHandler::rename_command(User* user) {
 		throw UserNotLoggin();
 	if (input_words.size() < 3)
 		throw WritingError();
+	if (!user->check_accessiblility_file(input_words[1]))
+		throw IllegalAccess();
+
 	std::string file_name = user->get_cwd() + "/" + input_words[1];
 	std::string new_name = user->get_cwd() + "/" + input_words[2];
 	if (std::rename(file_name.c_str(), new_name.c_str()) < 0)
 		throw WritingError();
+	logger->save_log("User with username: '" + user->get_username() + "' rename file with name: '" + input_words[1] +  "' to new name: '" + input_words[2] + "' successfully.");
 }
 
 void CommandHandler::retr(int client_fd, User* user) {
@@ -151,6 +173,8 @@ void CommandHandler::retr(int client_fd, User* user) {
 		throw UserNotLoggin();
 	if (input_words.size() < 2)
 		throw WritingError();
+	if (!user->check_accessiblility_file(input_words[1]))
+		throw IllegalAccess();
 	
 	struct stat sb;
 	std::string path = user->get_cwd() + "/" + input_words[1];
@@ -167,7 +191,9 @@ void CommandHandler::retr(int client_fd, User* user) {
 	strcat(tmp, "#");
 	strcat(tmp, std::to_string(stat_buf.st_size).c_str());
 	strcat(tmp, "$");
-	send(client_fd, tmp, strlen(tmp), 0);
+
+	if (send(client_fd, tmp, strlen(tmp), 0) < 0)
+		throw SendDataFailed();
 
 	if (fork() == 0) {
     	sendfile(data_fd, file_fd, NULL, stat_buf.st_size);
@@ -175,6 +201,7 @@ void CommandHandler::retr(int client_fd, User* user) {
 		close(data_fd);
 		exit(0);
 	}
+	logger->save_log("User with username: '" + user->get_username() + "' download file with name: '" + input_words[1] +  "' successfully.");
 	close(file_fd);
 }
 
@@ -183,8 +210,8 @@ void CommandHandler::user_command(int client_fd, User* user) {
 		throw WritingError();
 	if (user != nullptr && user->is_loggedin())
     	throw BadSequence();
-	user = this->data_base->get_user(input_words[1]);
-	this->data_base->set_user_fd(client_fd, user);
+	user = data_base->get_user(input_words[1]);
+	data_base->set_user_fd(client_fd, user);
 }
 
 void CommandHandler::pass_command(int client_fd, User* user) {
@@ -195,6 +222,34 @@ void CommandHandler::pass_command(int client_fd, User* user) {
 	user->login(input_words[1]);
 	int sock = create_data_connection(client_fd);
 	data_base->set_command_fd(client_fd, sock);
+}
+
+std::string CommandHandler::help(User* user) {
+	if (input_words.size() > 1)
+		throw WritingError(); 
+	
+	if (user == nullptr || !user->is_loggedin())
+		throw BadSequence();
+
+	std::string message;
+
+	message += "214\n";
+	message += "1) USER [name], Its argument is used to specify the user's string. It is used for user authentication.\n";
+	message += "2) Pass [password], Its argument is used to specify the user's password. It is used for user login.\n";
+	message += "3) PWD, It is used for get the path of current working directory.\n";
+	message += "4) MKD [directory path], Its argument is used to specify the new directory's path. It is used for creat new directory in specified path\n";
+	message += "5) DELE -f [file name], Its argument is used to specify the file's name. It is used for delete file with specified name\n";
+	message += "6) DELE -d [directory path], Its argument is used to specify the directory's path. It is used for delete directory with specified path\n";
+	message += "7) LS, It is used for view files in the current working directory.\n";
+	message += "8) CWD [path], Its argument is used to specify the new directory's path. It is used for change the current working directory to specified path.";
+	message += "If the argument equals to '..' it goes to previous directory and if no argument is entered, it goes to the first directory.\n";
+	message += "9) RENAME [from] [to], First argument is used to specify the file's name and second argument is used to specify new name for that file.";
+	message += "It is used for reaname file, if available.\n";
+	message += "10) RETR [name], Its argument is used to specify the file's name. It is used for download file with the given name, if available.\n";
+	message += "11) HELP, It is used to display commands on the server along with instructions for using them.\n";
+	message += "12) QUIT, It is used for logout and remove current user from the system.\n";
+
+	return message;
 }
 
 void CommandHandler::quit(int client_fd, User* user) {
@@ -213,6 +268,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 	} 
 	else if (input_words[0] == "pass") {
 		pass_command(client_fd, user);
+		logger->save_log("User with username: '" + user->get_username() + "' entered successfully.");
 		return LOGIN_SUCCESS;
 	} 
 	
@@ -225,6 +281,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 	else if (input_words[0] == "mkd") {
 		mkd(client_fd, user);
 		std::string path = user->get_cwd() + "/" + input_words[1];
+		logger->save_log("User with username: '" + user->get_username() + "' create directory or file with path: '" + input_words[1] +  "' successfully.");
 		return "257: " + path + " created.";
 	} 
 	
@@ -251,16 +308,16 @@ std::string CommandHandler::handle_command(int client_fd) {
 	
 	else if (input_words[0] == "retr") {
 		retr(client_fd, user);
-		return DOWNLOAD_SUCCESS;
-		
+		return DOWNLOAD_SUCCESS;	
 	} 
 	
-	else if (input_words[0] == "help") { // TODO: help
-
+	else if (input_words[0] == "help") { 
+		return help(user);
 	} 
 	
 	else if (input_words[0] == "quit") { //TODO: close socket
 		quit(client_fd, user);
+		logger->save_log("User with username: '" + user->get_username() + "' exit successfully.");
 		return LOGOUT_SUCCESS;
 	}
 

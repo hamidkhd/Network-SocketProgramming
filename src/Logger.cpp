@@ -15,5 +15,5 @@ void Logger::find_time() {
 
 void Logger::save_log(std::string massage) {
     find_time();
-    log_file << massage << "At: " << std::ctime(&time) << std::endl;
+    log_file << massage << " At: " << std::ctime(&time) << std::endl;
 }

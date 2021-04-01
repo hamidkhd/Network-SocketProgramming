@@ -1,26 +1,24 @@
 #ifndef _COMMAND_HANDLER_
 #define _COMMAND_HANDLER_
 
-#include <sys/stat.h>
-#include <dirent.h>
-#include <vector>
-#include <algorithm>
-#include <sys/sendfile.h>
-
-#include "include.hpp"
+#include "Include.hpp"
 #include "DataBase.hpp"
+#include "Logger.hpp"
 
+#define IP_PROTOCOL 0 
 #define DATA_PORT 8081 
 
 class DataBase;
-
+class Logger;
 
 class CommandHandler {
-
+    
     private:
-        std::vector <std::string> input_words; 
         DataBase* data_base;
+        Logger* logger;
         int data_socket;
+        struct sockaddr_in data_addr;
+        std::vector <std::string> input_words; 
 
         void mkd(int client_fd, User* user);
         void dele(User* user);
@@ -30,10 +28,11 @@ class CommandHandler {
         void retr(int client_fd, User* user);
         void user_command(int client_fd, User* user);
         void pass_command(int client_fd, User* user);
+        std::string help(User* user);
         void quit(int client_fd, User* user);
 
     public:
-        CommandHandler();
+        CommandHandler(DataBase* _data_base, Logger* _logger);
         ~CommandHandler();
         std::string run_command_handler(std::string input, int client_fd);
         void separate_input_to_words(std::string input);

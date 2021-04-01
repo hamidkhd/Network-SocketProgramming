@@ -1,7 +1,7 @@
 #ifndef _RESPONSE_
 #define _RESPONSE_
 
-#include "include.hpp"
+#include "Include.hpp"
 
 #define SUCCESS_USERNAME_FINDING "331: User name okay, need password."
 #define LOGIN_SUCCESS "230: User logged in, proceed. Logged out if appropriate"
