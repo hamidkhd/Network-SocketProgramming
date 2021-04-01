@@ -1,8 +1,8 @@
 #include "User.hpp"
 
 
-User::User(std::string _username, std::string _password, bool _admin_status, int _size, std::vector <std::string> _accessible_files) 
-    : username(_username), password(_password), admin_status(_admin_status), size(_size), accessible_files(_accessible_files) {
+User::User(std::string _username, std::string _password, bool _admin_status, int _size) 
+    : username(_username), password(_password), admin_status(_admin_status), size(_size) {
         authenticated = false;
         curr_dir = getenv("PWD");
     }
@@ -17,7 +17,7 @@ std::string User::get_password() {
     return password;
 }
 
-bool User::get_admin_status() {
+bool User::is_admin() {
     return admin_status;
 }
 
@@ -48,10 +48,4 @@ void User::logout() {
 
 bool User::is_loggedin() {
     return authenticated;
-}
-
-bool User::check_accessiblility_file(std::string file_name) {
-    if((*find(accessible_files.begin(), accessible_files.end(), file_name) == file_name) && admin_status == false)
-        return false;
-    return true;
 }

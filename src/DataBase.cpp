@@ -21,10 +21,9 @@ void DataBase::parse_json() {
 
     json_file >> json_data;
 
-    std::vector <std::string> _accessible_files, empty;
 
     for (auto& admin_file : json_data["files"]) {
-        _accessible_files.push_back(admin_file.get<std::string>());
+        restricted_files.push_back(admin_file.get<std::string>());
     }
 
     for (auto& user_data : json_data["users"]) {
@@ -35,9 +34,9 @@ void DataBase::parse_json() {
         std::string size = user_data["size"].get<std::string>();
 
         if (admin_status == true)
-            users.push_back(new User(username, password, admin_status, stoi(size), _accessible_files));
+            users.push_back(new User(username, password, admin_status, stoi(size)));
         else 
-            users.push_back(new User(username, password, admin_status, stoi(size), empty));
+            users.push_back(new User(username, password, admin_status, stoi(size)));
     }
 
 }
@@ -83,4 +82,12 @@ void DataBase::remove_command_fd(int fd) {
         command_fds.erase(fd);
         close(fd);
     }
+}
+
+bool DataBase::is_restricted(std::string fname) {
+    for (std::string name : restricted_files) {
+        if (name == fname)
+            return true;
+    }
+    return false;
 }

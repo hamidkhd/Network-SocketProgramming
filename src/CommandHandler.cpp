@@ -86,7 +86,7 @@ void CommandHandler::dele(User* user) {
 	struct stat sb;
 	std::string path = user->get_cwd() + "/" + input_words[2];
 	if (input_words[1] == "-f") {
-		if (!user->check_accessiblility_file(input_words[1]))
+		if (data_base->is_restricted(input_words[2]) && !user->is_admin())
 		throw IllegalAccess();
 		
 		if (stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode))
@@ -158,7 +158,7 @@ void CommandHandler::rename_command(User* user) {
 		throw UserNotLoggin();
 	if (input_words.size() < 3)
 		throw WritingError();
-	if (!user->check_accessiblility_file(input_words[1]))
+	if (data_base->is_restricted(input_words[1]) && !user->is_admin())
 		throw IllegalAccess();
 
 	std::string file_name = user->get_cwd() + "/" + input_words[1];
@@ -173,7 +173,7 @@ void CommandHandler::retr(int client_fd, User* user) {
 		throw UserNotLoggin();
 	if (input_words.size() < 2)
 		throw WritingError();
-	if (!user->check_accessiblility_file(input_words[1]))
+	if (data_base->is_restricted(input_words[1]) && !user->is_admin())
 		throw IllegalAccess();
 	
 	struct stat sb;
