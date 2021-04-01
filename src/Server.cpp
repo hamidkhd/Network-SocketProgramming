@@ -68,8 +68,13 @@ void Server::run() {
 					if ((temp = recv(i , buffer, 1024, 0)) < 0) {
 						throw ReciveDataFailed();
 					}
-					else if (temp == 0) {
+					else if (temp == 0) { // client disconnected
 						close(i);
+						User* user = data_base->get_user(i);
+						data_base->remove_user_fd(i);
+						data_base->remove_command_fd(i);
+						if (user->is_loggedin())
+							user->logout();
 						FD_CLR(i, &master_set);
 					} else {
                     	std::string resp = command_handler->run_command_handler(buffer, i);
