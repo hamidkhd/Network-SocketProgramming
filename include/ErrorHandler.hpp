@@ -1,7 +1,7 @@
-#ifndef ERRORHANDLER
-#define ERRORHANDLER
+#ifndef _ERROR_HANDLER_
+#define _ERROR_HANDLER_
 
-#include "include.hpp"
+#include "Include.hpp"
 
 #define USER_NOT_LOGGIN "332: Need account for login."
 #define WRITING_ERROR "501: Syntax error in parameters or arguments."
