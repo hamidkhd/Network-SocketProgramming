@@ -79,8 +79,8 @@ void DataBase::set_command_fd(int data_fd, int command_fd) {
 
 void DataBase::remove_command_fd(int fd) {
     if (command_fds.count(fd)) {
+        close(command_fds[fd]);
         command_fds.erase(fd);
-        close(fd);
     }
 }
 

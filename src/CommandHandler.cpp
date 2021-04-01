@@ -259,6 +259,7 @@ void CommandHandler::quit(int client_fd, User* user) {
 		throw BadSequence();
 	user->logout();
 	data_base->remove_user_fd(client_fd);
+	data_base->remove_command_fd(client_fd);
 }
 
 std::string CommandHandler::handle_command(int client_fd) {
@@ -317,7 +318,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 		return help(client_fd);
 	} 
 	
-	else if (input_words[0] == "quit") { //TODO: close socket
+	else if (input_words[0] == "quit") {
 		quit(client_fd, user);
 		logger->save_log("User with username: '" + user->get_username() + "' exit successfully.");
 		return LOGOUT_SUCCESS;
