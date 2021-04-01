@@ -1,7 +1,7 @@
 #ifndef DATABASE
 #define DATABASE 
 
-#include "include.hpp"
+#include "Include.hpp"
 #include "User.hpp"
 
 class User; 
@@ -9,8 +9,8 @@ class User;
 class DataBase {
 
     private:
-		std::vector <User*> users;
         std::ifstream json_file;
+		std::vector <User*> users;
         std::map <int, User*> fd_users;
         std::map <int, int> command_fds;
 
