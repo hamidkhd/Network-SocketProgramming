@@ -224,13 +224,7 @@ void CommandHandler::pass_command(int client_fd, User* user) {
 	data_base->set_command_fd(client_fd, sock);
 }
 
-std::string CommandHandler::help(int client_fd, User* user) {
-	if (input_words.size() > 1)
-		throw WritingError(); 
-	
-	if (user == nullptr || !user->is_loggedin())
-		throw BadSequence();
-
+std::string CommandHandler::help(int client_fd) {
 	std::string message;
 
 	message += "214\n";
@@ -320,7 +314,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 	} 
 	
 	else if (input_words[0] == "help") { 
-		return help(client_fd, user);
+		return help(client_fd);
 	} 
 	
 	else if (input_words[0] == "quit") { //TODO: close socket
