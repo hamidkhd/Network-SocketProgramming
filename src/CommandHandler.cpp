@@ -214,6 +214,8 @@ void CommandHandler::user_command(int client_fd, User* user) {
 	if (user != nullptr && user->is_loggedin())
     	throw BadSequence();
 	user = data_base->get_user(input_words[1]);
+	if (user->is_loggedin())
+		throw BadSequence();
 	data_base->set_user_fd(client_fd, user);
 }
 
