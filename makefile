@@ -14,6 +14,7 @@ all: $(BUILD_DIR) $(SERVER_EXECUTABLE_FILE) \
 
 SERVER_OBJECTS = \
 	$(BUILD_DIR)/DataBase.o \
+	$(BUILD_DIR)/Logger.o \
 	$(BUILD_DIR)/User.o \
 	$(BUILD_DIR)/ErrorHandler.o \
 	$(BUILD_DIR)/CommandHandler.o \
@@ -27,6 +28,10 @@ CLIENT_OBJECTS = \
 DataBaseSensitivityList = \
 	$(SRC_DIR)/DataBase.cpp \
 	$(INCLUDE_DIR)/DataBase.hpp 
+
+LoggerSensitivityList = \
+	$(SRC_DIR)/Logger.cpp \
+	$(INCLUDE_DIR)/Logger.hpp 
 
 UserSensitivityList = \
 	$(SRC_DIR)/User.cpp \
@@ -55,6 +60,9 @@ $(BUILD_DIR):
 
 $(BUILD_DIR)/DataBase.o: $(DataBaseSensitivityList)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/DataBase.cpp -o $(BUILD_DIR)/DataBase.o
+
+$(BUILD_DIR)/Logger.o: $(LoggerSensitivityList)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Logger.cpp -o $(BUILD_DIR)/Logger.o
 
 $(BUILD_DIR)/User.o: $(UserSensitivityList)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/User.cpp -o $(BUILD_DIR)/User.o
