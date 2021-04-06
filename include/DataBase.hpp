@@ -14,6 +14,8 @@ class DataBase {
         std::map <int, User*> fd_users;
         std::map <int, int> command_fds;
         std::vector <std::string> restricted_files;
+        int command_port;
+        int data_port;
 
     public:
         DataBase();
@@ -29,6 +31,8 @@ class DataBase {
         void set_command_fd(int data_fd, int command_fd);
         void remove_command_fd(int fd);
         bool is_restricted(std::string fname);
+        int get_command_port();
+        int get_data_port();
 };
 
 #endif 

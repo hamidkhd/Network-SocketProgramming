@@ -1,6 +1,10 @@
 #include "Client.hpp"
 
+using json = nlohmann::json;
+
 Client::Client() {
+	read_ports();
+
 	try {			
 		connect_to_server();		
 	}
@@ -14,9 +18,17 @@ Client::~Client() {
 	close(command_socket);
 }
 
+void Client::read_ports() {
+	std::ifstream json_file = std::ifstream("config.json");
+	nlohmann::json json_data;
+    json_file >> json_data;
+	command_port = json_data["commandChannelPort"];
+    data_port = json_data["dataChannelPort"];
+}
+
 void Client::connect_to_server() {
     command_addr.sin_family = AF_INET; 
-	command_addr.sin_port = htons(COMMAND_PORT);
+	command_addr.sin_port = htons(command_port);
 
     if ((command_socket = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL)) < 0) {
         throw SocketCreationFailed();
@@ -29,7 +41,7 @@ void Client::connect_to_server() {
         throw ConnectionFailed();
 
 	data_addr.sin_family = AF_INET; 
-    data_addr.sin_port = htons(DATA_PORT); 
+    data_addr.sin_port = htons(data_port); 
     data_addr.sin_addr.s_addr = inet_addr(IP_ADDRESS);
 
 	if ((data_socket = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL)) < 0) {

@@ -8,7 +8,7 @@ CommandHandler::CommandHandler(DataBase* _data_base, Logger* _logger):
 
     data_addr.sin_family = AF_INET;
     data_addr.sin_addr.s_addr = INADDR_ANY;
-    data_addr.sin_port = htons(DATA_PORT);
+    data_addr.sin_port = htons(data_base->get_data_port());
 
 	if ((data_socket = socket(AF_INET , SOCK_STREAM , IP_PROTOCOL)) == 0) {
 		throw SocketCreationFailed();

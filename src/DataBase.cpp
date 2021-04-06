@@ -21,6 +21,9 @@ void DataBase::parse_json() {
 
     json_file >> json_data;
 
+    command_port = json_data["commandChannelPort"];
+    data_port = json_data["dataChannelPort"];
+
 
     for (auto& admin_file : json_data["files"]) {
         restricted_files.push_back(admin_file.get<std::string>());
@@ -39,6 +42,14 @@ void DataBase::parse_json() {
             users.push_back(new User(username, password, admin_status, stoi(size)));
     }
 
+}
+
+int DataBase::get_command_port() {
+    return command_port;
+}
+
+int DataBase::get_data_port() {
+    return data_port;
 }
 
 std::vector <User*> DataBase::get_users() {

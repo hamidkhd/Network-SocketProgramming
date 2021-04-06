@@ -23,7 +23,7 @@ void Server::initial_socket() {
 	int command_addr_len = sizeof(command_addr); 
 	command_addr.sin_family = AF_INET; 
 	command_addr.sin_addr.s_addr = INADDR_ANY; 
-	command_addr.sin_port = htons(COMMAND_PORT); 
+	command_addr.sin_port = htons(data_base->get_command_port()); 
 
 	if ((command_socket = socket(AF_INET , SOCK_STREAM , IP_PROTOCOL)) == 0) 
 		throw SocketCreationFailed();
