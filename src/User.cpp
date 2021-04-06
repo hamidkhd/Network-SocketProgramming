@@ -27,7 +27,9 @@ std::string User::get_cwd() {
 }
 
 void User::set_cwd(std::string dir) {
-    curr_dir = dir;
+    char tmp[300];
+    realpath(dir.c_str(), tmp);
+    curr_dir = std::string(tmp);
 }
 
 void User::login(std::string pw) {

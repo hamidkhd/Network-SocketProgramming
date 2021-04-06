@@ -310,7 +310,7 @@ std::string CommandHandler::handle_command(int client_fd) {
 		return LIST_TRANSFER_SUCCESS;
 	} 
 	
-	else if (input_words[0] == "cwd") { // TODO: remove .. from string
+	else if (input_words[0] == "cwd") {
 		cwd(user);
 		return CHANGE_SUCCESS;
 	} 
