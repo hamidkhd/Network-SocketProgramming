@@ -3,9 +3,6 @@
 
 #include "Include.hpp"
 
-#define COMMAND_PORT 8080 
-#define DATA_PORT 8081 
-
 #define IP_PROTOCOL 0 
 #define IP_ADDRESS "127.0.0.1"
 
