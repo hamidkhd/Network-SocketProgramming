@@ -63,7 +63,6 @@ int CommandHandler::create_data_connection(int fd) {
 	int new_socket;
 	if ((new_socket = accept(data_socket, (struct sockaddr *)&client_addr, (socklen_t*)&addr_len)) < 0) {
 		throw AcceptFailed();
-		// throw ConnectionFailed();
 	}
 	return new_socket;
 }
@@ -81,6 +80,8 @@ void CommandHandler::dele(User* user) {
 	if (user == nullptr || !user->is_loggedin())
 		throw UserNotLoggin();
 	if (input_words.size() < 3)
+		throw WritingError();
+	if (input_words[2].find('/') != std::string::npos)
 		throw WritingError();
 	
 	struct stat sb;
@@ -160,6 +161,9 @@ void CommandHandler::rename_command(User* user) {
 		throw WritingError();
 	if (data_base->is_restricted(input_words[1]) && !user->is_admin())
 		throw IllegalAccess();
+	if (input_words[1].find('/') != std::string::npos ||
+		input_words[2].find('/') != std::string::npos)
+		throw WritingError();
 
 	std::string file_name = user->get_cwd() + "/" + input_words[1];
 	std::string new_name = user->get_cwd() + "/" + input_words[2];
@@ -175,6 +179,8 @@ void CommandHandler::retr(int client_fd, User* user) {
 		throw WritingError();
 	if (data_base->is_restricted(input_words[1]) && !user->is_admin())
 		throw IllegalAccess();
+	if (input_words[1].find('/') != std::string::npos)
+		throw WritingError();
 	
 	struct stat sb;
 	std::string path = user->get_cwd() + "/" + input_words[1];
