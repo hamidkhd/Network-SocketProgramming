@@ -335,5 +335,5 @@ std::string CommandHandler::handle_command(int client_fd) {
 		return LOGOUT_SUCCESS;
 	}
 
-	throw WritingError();
+	throw DefaultError();
 }
